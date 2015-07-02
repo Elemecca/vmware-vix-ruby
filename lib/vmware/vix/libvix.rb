@@ -17,10 +17,14 @@
 
 require 'ffi'
 
-# FFI interface to the native VIX library.
 module VMware
-module VIX
-module LibVIX
+module Vix
+
+# FFI interface to the native VIX library.
+#
+# API documentation may be found at
+# https://www.vmware.com/support/developer/vix-api/vix113_reference/
+module LibVix
   extend FFI::Library
 
   ffi_lib '/Applications/VMware Fusion.app/Contents/Public/libvixAllProducts.dylib'
@@ -43,15 +47,15 @@ module LibVIX
 
   typedef :uint64, :VixError
 
-  def error_code (code)
+  def self.error_code (code)
     code & 0xFFFF
   end
 
-  def succeeded? (code)
+  def self.succeeded? (code)
     code == ErrorCode[ :ok ]
   end
 
-  def failed? (code)
+  def self.failed? (code)
     code != ErrorCode[ :ok ]
   end
 
@@ -378,7 +382,7 @@ module LibVIX
   attach_function :Vix_GetErrorText, [ :VixError, :string ], :string
 
 
-  enum :VixPropertyType, [
+  PropertyType = enum :VixPropertyType, [
       :any, 0,
       :integer, 1,
       :string, 2,
@@ -388,7 +392,7 @@ module LibVIX
       :blob, 6,
     ]
 
-  enum :VixPropertyID, [
+  PropertyID = enum :VixPropertyID, [
       :none, 0,
 
       # Properties used by several handle types.
@@ -488,7 +492,7 @@ module LibVIX
 
   attach_function :Vix_GetHandleType, [ :VixHandle ], :VixHandleType
 
-  attach_function :Vix_GetProperties, [ :VixHandle, :VixPropertyID, :varargs ], :VixError
+  attach_function :Vix_GetProperties, [ :VixHandle, :varargs ], :VixError
 
   attach_function :Vix_GetPropertyType, [
       :VixHandle,
@@ -586,7 +590,7 @@ module LibVIX
   attach_function :VixPropertyList_AllocPropertyList, [
       :VixHandle, # hostHandle
       :pointer, # VixHandle *resultHandle
-      :int, :varargs, # int firstPropertyID, ...
+      :varargs, # int firstPropertyID, ...
     ], :VixError
 
 
@@ -1067,7 +1071,7 @@ module LibVIX
 
   attach_function :VixJob_Wait, [
       :VixHandle, #  jobHandle
-      :VixPropertyID, :varargs # propertyID, ...
+      :varargs # int propertyID, ...
     ], :VixError
 
   attach_function :VixJob_CheckCompletion, [
@@ -1086,7 +1090,7 @@ module LibVIX
   attach_function :VixJob_GetNthProperties, [
       :VixHandle, # jobHandle
       :int, # index
-      :int, :varargs # propertyID, ...
+      :varargs # int propertyID, ...
     ], :VixError
 
 
@@ -1107,6 +1111,15 @@ module LibVIX
       :pointer, # VixHandle *parentSnapshotHandle
     ], :VixError
 
-end # module LibVIX
-end # module VIX
+  class Error < StandardError
+    attr_reader :errno
+
+    def initialize (errno)
+      @errno = errno
+      super( LibVix.Vix_GetErrorText( errno, nil ) )
+    end
+  end
+
+end # module LibVix
+end # module Vix
 end # module VMware
