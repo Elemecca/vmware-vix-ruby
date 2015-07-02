@@ -14,7 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'vmware/vix/version'
+
 require 'vmware/vix/libvix'
 
 require 'vmware/vix/handle'
 require 'vmware/vix/host'
+
+module VMware
+
+  # FFI binding for VMware VIX, plus abstraction.
+  module Vix
+  end
+
+end
