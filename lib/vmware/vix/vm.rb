@@ -17,22 +17,20 @@
 module VMware
 module Vix
 
-  class Host < Handle
-    def self.connect_workstation
-      job = LibVix.VixHost_Connect(
-          LibVix::API_VERSION,
-          :vmware_workstation,
-          nil, 0, # no connection info
-          nil, nil, # no auth info
-          0, # options
-          LibVix::INVALID_HANDLE, # no properties
+  class VM < Handle
+
+    def [] (key)
+      job = LibVix.VixVM_ReadVariable(
+          @handle, :vm_config_runtime_only,
+          key.to_s,
+          0, # no options
           nil, nil # no callback
         )
 
-      host_ptr = Vix::Handle::Pointer.new
+      result_ptr = FFI::MemoryPointer.new :pointer
       err = LibVix.VixJob_Wait( job,
-          :VixPropertyID, :job_result_handle,
-            :pointer, host_ptr,
+          :VixPropertyID, :job_result_vm_variable_string,
+            :pointer, result_ptr,
           :VixPropertyID, :none
         )
 
@@ -43,38 +41,30 @@ module Vix
         raise LibVix::Error.new( err )
       end
 
-      self.new host_ptr.to_handle
+      string_ptr = result_ptr.read_pointer
+      value = string_ptr.read_string_to_null
+      LibVix.Vix_FreeBuffer( string_ptr )
+
+      value
     end
 
-    def self.finalizer (handle)
-      # for reasons I don't entirely understand, hosts require
-      # VixHost_Disconnect but not Vix_ReleaseRef
-      proc { LibVix.VixHost_Disconnect( handle ) }
-    end
-
-    def open (path)
-      job = LibVix.VixHost_OpenVM(
-          @handle, path,
-          :normal, # no options
-          LibVix::INVALID_HANDLE, #  no properties
+    def []= (key, value)
+      job = LibVix.VixVM_WriteVariable(
+          @handle, :vm_config_runtime_only,
+          key.to_s, value.to_s,
+          0, # no options
           nil, nil # no callback
         )
 
-      vm_ptr = Vix::Handle::Pointer.new
       err = LibVix.VixJob_Wait( job,
-          :VixPropertyID, :job_result_handle,
-            :pointer, vm_ptr,
           :VixPropertyID, :none
         )
-
-      LibVix.Vix_ReleaseHandle( job )
-      job = LibVix::INVALID_HANDLE
 
       if LibVix.failed? err
         raise LibVix::Error.new( err )
       end
 
-      Vix::VM.new vm_ptr.to_handle
+      value
     end
   end
 

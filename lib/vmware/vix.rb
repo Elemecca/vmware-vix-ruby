@@ -20,6 +20,7 @@ require 'vmware/vix/libvix'
 
 require 'vmware/vix/handle'
 require 'vmware/vix/host'
+require 'vmware/vix/vm'
 
 module VMware
 

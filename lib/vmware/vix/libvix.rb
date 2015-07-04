@@ -568,8 +568,7 @@ module LibVix
     ], :VixHandle
 
 
-  typedef :int, :VixVMOpenOptions
-  VMOpenOptions = enum( :normal, 0 )
+  VMOpenOptions = enum :VixVMOpenOptions, [ :normal, 0 ]
 
   # VixHost_OpenVM() supersedes VixVM_Open() since it allows for
   # the passing of option flags and extra data in the form of a
