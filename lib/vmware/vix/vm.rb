@@ -19,6 +19,83 @@ module Vix
 
   class VM < Handle
 
+    def start()
+      Vix::Job.call(
+          :VixVM_PowerOn, @handle,
+          :normal, # don't open the GUI
+          LibVix::INVALID_HANDLE # no properties
+        )
+
+      self
+    end
+
+    def poweroff()
+      Vix::Job.call(
+          :VixVM_PowerOff, @handle,
+          :normal, # don't shut down the guest, just power off
+        )
+
+      self
+    end
+
+    def shutdown()
+      Vix::Job.call(
+          :VixVM_PowerOff, @handle,
+          :from_guest, # do a graceful shutdown via Tools
+        )
+
+      self
+    end
+
+    def reset()
+      Vix::Job.call(
+          :VixVM_Reset, @handle,
+          :normal, # don't shut down the guest, just power off
+        )
+
+      self
+    end
+
+    def reboot()
+      Vix::Job.call(
+          :VixVM_Reset, @handle,
+          :from_guest, # do a graceful shutdown via Tools
+        )
+
+      self
+    end
+
+    def suspend()
+      Vix::Job.call(
+          :VixVM_Suspend, @handle,
+          0 # no options
+        )
+
+      self
+    end
+
+    def pause()
+      Vix::Job.call(
+          :VixVM_Pause, @handle,
+          0, # no options
+          LibVix::INVALID_HANDLE # no properties
+        )
+
+      self
+    end
+
+    def unpause()
+      Vix::Job.call(
+          :VixVM_Unpause, @handle,
+          0, # no options
+          LibVix::INVALID_HANDLE # no properties
+        )
+
+      self
+    end
+
+
+
     def [] (key)
       job = Vix::Job.call(
           :VixVM_ReadVariable,
