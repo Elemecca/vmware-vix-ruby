@@ -27,7 +27,10 @@ module Vix
 module LibVix
   extend FFI::Library
 
-  ffi_lib '/Applications/VMware Fusion.app/Contents/Public/libvixAllProducts.dylib'
+  ffi_lib [
+      'libvixAllProducts.so',
+      '/Applications/VMware Fusion.app/Contents/Public/libvixAllProducts.dylib',
+    ]
 
 
   # opaque handle used to refer to most objects
