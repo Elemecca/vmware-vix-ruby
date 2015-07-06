@@ -674,8 +674,7 @@ module LibVix
     ], :VixHandle
 
 
-  typedef :int, :VixPowerState
-  PowerState = enum(
+  PowerState = enum :VixPowerState, [
       :powering_off, 0x0001,
       :powered_off, 0x0002,
       :powering_on, 0x0004,
@@ -687,14 +686,13 @@ module LibVix
       :blocked_on_msg, 0x0100,
       :paused, 0x0200,
       :resuming, 0x0800,
-    )
+    ]
 
-  typedef :int, :VixToolsState
-  ToolsState = enum(
+  ToolsState = enum :VixToolsState, [
       :unknown, 0x0001,
       :running, 0x0002,
       :not_installed, 0x0004,
-    )
+    ]
 
 
   # These flags describe optional functions supported by different

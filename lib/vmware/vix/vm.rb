@@ -19,6 +19,43 @@ module Vix
 
   class VM < Handle
 
+    def power_state? (value)
+      0 != (property( :vm_power_state ) & LibVix::PowerState[ value ])
+    end
+
+    def powered_off?
+      power_state? :powered_off
+    end
+
+    def powering_off?
+      power_state? :powering_off
+    end
+
+    def powered_on?
+      power_state? :powered_on
+    end
+
+    def powering_on?
+      power_state? :powering_on
+    end
+
+    def suspended?
+      power_state? :suspended
+    end
+
+    def suspending?
+      power_state? :suspending
+    end
+
+    def resetting?
+      power_state? :resetting
+    end
+
+    def tools_running?
+      power_state? :tools_running
+    end
+
+
     def start()
       Vix::Job.call(
           :VixVM_PowerOn, @handle,
