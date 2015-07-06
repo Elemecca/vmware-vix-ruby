@@ -19,31 +19,17 @@ module Vix
 
   class Host < Handle
     def self.connect_workstation
-      job = LibVix.VixHost_Connect(
+      job = Vix::Job.call(
+          :VixHost_Connect,
           LibVix::API_VERSION,
           :vmware_workstation,
           nil, 0, # no connection info
           nil, nil, # no auth info
           0, # options
-          LibVix::INVALID_HANDLE, # no properties
-          nil, nil # no callback
+          LibVix::INVALID_HANDLE # no properties
         )
 
-      host_ptr = Vix::Handle::Pointer.new
-      err = LibVix.VixJob_Wait( job,
-          :VixPropertyID, :job_result_handle,
-            :pointer, host_ptr,
-          :VixPropertyID, :none
-        )
-
-      LibVix.Vix_ReleaseHandle( job )
-      job = LibVix::INVALID_HANDLE
-
-      if LibVix.failed? err
-        raise LibVix::Error.new( err )
-      end
-
-      self.new host_ptr.to_handle
+      job.property :job_result_handle
     end
 
     def self.finalizer (handle)
@@ -53,28 +39,14 @@ module Vix
     end
 
     def open (path)
-      job = LibVix.VixHost_OpenVM(
+      job = Vix::Job.call(
+          :VixHost_OpenVM,
           @handle, path,
           :normal, # no options
-          LibVix::INVALID_HANDLE, #  no properties
-          nil, nil # no callback
+          LibVix::INVALID_HANDLE # no properties
         )
 
-      vm_ptr = Vix::Handle::Pointer.new
-      err = LibVix.VixJob_Wait( job,
-          :VixPropertyID, :job_result_handle,
-            :pointer, vm_ptr,
-          :VixPropertyID, :none
-        )
-
-      LibVix.Vix_ReleaseHandle( job )
-      job = LibVix::INVALID_HANDLE
-
-      if LibVix.failed? err
-        raise LibVix::Error.new( err )
-      end
-
-      Vix::VM.new vm_ptr.to_handle
+      job.property :job_result_handle
     end
   end
 

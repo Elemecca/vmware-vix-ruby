@@ -18,6 +18,20 @@ module VMware
 module Vix
 
   class Handle
+    def self.magic (handle)
+      type = LibVix.Vix_GetHandleType( handle )
+      case type
+      when :host
+        Vix::Host.new handle
+      when :vm
+        Vix::VM.new handle
+      when :job
+        Vix::Job.new handle
+      else
+        Vix::Handle.new handle
+      end
+    end
+
     def self.finalizer (handle)
       proc { LibVix.Vix_ReleaseHandle( handle ) }
     end
@@ -92,7 +106,7 @@ module Vix
         value = pointer.read_string_to_null
         LibVix.Vix_FreeBuffer pointer
       when :handle
-        value = Handle.new value
+        value = Handle.magic value
       end
 
       value

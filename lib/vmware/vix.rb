@@ -19,6 +19,7 @@ require 'vmware/vix/version'
 require 'vmware/vix/libvix'
 
 require 'vmware/vix/handle'
+require 'vmware/vix/job'
 require 'vmware/vix/host'
 require 'vmware/vix/vm'
 

@@ -17,28 +17,19 @@
 module VMware
 module Vix
 
-  class VM < Handle
-
-    def [] (key)
-      job = Vix::Job.call(
-          :VixVM_ReadVariable,
-          @handle, :vm_config_runtime_only,
-          key.to_s,
-          0 # no options
-        )
-
-      job.property :job_result_vm_variable_string
+  class Job < Handle
+    def self.call (func, *args)
+      job = self.new LibVix.send( func, *args, nil, nil )
+      job.wait
+      job
     end
 
-    def []= (key, value)
-      Vix::Job.call(
-          :VixVM_WriteVariable,
-          @handle, :vm_config_runtime_only,
-          key.to_s, value.to_s,
-          0 # no options
-        )
+    def wait()
+      err = LibVix.VixJob_Wait( @handle, :VixPropertyID, :none )
 
-      value
+      if LibVix.failed? err
+        raise LibVix::Error.new( err )
+      end
     end
   end
 
